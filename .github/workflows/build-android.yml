@@ -1,0 +1,97 @@
+# NOTE: This workflow is temporarily commented out until repository setup is complete.
+# To enable it, uncomment the lines below.
+
+# name: Build Android (Self-Hosted CI)
+# 
+# on:
+#   push:
+#     tags:
+#       - 'v*'
+#       - 'karyavali@*'
+#   workflow_dispatch:
+#     inputs:
+#       build_type:
+#         description: 'Android build type (debug produces directly installable APK for test devices)'
+#         required: true
+#         default: 'debug'
+#         type: choice
+#         options:
+#           - debug
+#           - release
+# 
+# jobs:
+#   build:
+#     name: Build Android APK
+#     runs-on: ubuntu-latest
+#     env:
+#       BUILD_NUMBER: ${{ github.run_number }}
+# 
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+# 
+#       - name: Setup Java 17
+#         uses: actions/setup-java@v4
+#         with:
+#           distribution: 'temurin'
+#           java-version: 17
+# 
+#       - name: Setup ccache (C++ Compilation Cache for Hermes & New Arch)
+#         uses: hendrikmuhs/ccache-action@v1.2
+#         with:
+#           key: android-ccache-${{ github.ref }}
+#           restore-keys: |
+#             android-ccache-main
+#             android-ccache-
+#           max-size: 2G
+# 
+#       - name: Setup Gradle
+#         uses: gradle/actions/setup-gradle@v3
+#         with:
+#           build-root-directory: android
+#           cache-read-only: ${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
+# 
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+# 
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+#           cache: 'pnpm'
+# 
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+# 
+#       - name: Configure Gradle JVM & Build Cache
+#         run: |
+#           mkdir -p ~/.gradle
+#           cat << 'EOF' >> ~/.gradle/gradle.properties
+#           org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m
+#           org.gradle.parallel=true
+#           org.gradle.caching=true
+#           EOF
+#           echo "NDK_CCACHE=$(which ccache)" >> $GITHUB_ENV
+# 
+#       - name: Generate native Android code (Expo Prebuild)
+#         run: npx expo prebuild --platform android --clean --no-install
+# 
+#       - name: Build Android APK
+#         working-directory: android
+#         run: |
+#           BUILD_TYPE="${{ inputs.build_type || 'debug' }}"
+#           if [ "$BUILD_TYPE" = "release" ]; then
+#             ./gradlew assembleRelease --no-daemon
+#           else
+#             ./gradlew assembleDebug --no-daemon
+#           fi
+# 
+#       - name: Show ccache stats
+#         run: ccache -s
+# 
+#       - name: Upload Android APK
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: karyavali-android-build-${{ github.run_number }}
+#           path: android/app/build/outputs/apk/**/*.apk
+#           retention-days: 14
