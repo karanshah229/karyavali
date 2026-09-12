@@ -20,6 +20,31 @@ module.exports = defineConfig([
       ],
       'react-native/no-unused-styles': 'warn',
       'react-native/split-platform-components': 'warn',
+
+      // React 19 / JSX transform cleanups
+      'react/jsx-uses-react': 'off',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react',
+              importNames: ['default'],
+              message:
+                "Default import `import React from 'react'` is not needed in React 19. Use named imports (e.g. `import { useState } from 'react'`) instead.",
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "ImportDeclaration[importKind!='type'][source.value='react'] > ImportNamespaceSpecifier",
+          message:
+            "Do not import `* as React` in React 19. Use named imports (e.g. `import { useState } from 'react'`) instead.",
+        },
+      ],
     },
   },
   {
