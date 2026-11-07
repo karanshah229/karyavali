@@ -1,7 +1,7 @@
 # Karyavali — Product Reference
 
 **Status:** Draft — product-owner review pending  
-**Version:** 1.1  
+**Version:** 1.2  
 **Updated:** 7 November 2026  
 **Scope:** Target product behavior for the expanded mobile application
 
@@ -67,7 +67,7 @@ Logout requires connectivity and a completed synchronization of pending work. If
 
 ### 3.4 Dormant registration and action
 
-After someone verifies a dormant identity’s number, existing assignments and pending list invitations for that identity become available to that account.
+Tasks can be assigned directly to any contact with a valid phone number, whether active or dormant. Assignment takes effect without an invitation, acceptance, or recipient approval. Lists can also be shared directly with those contacts. After a dormant person registers and verifies that number, their existing assigned tasks and shared lists are available automatically; no acceptance step is required.
 
 A dormant person cannot directly change task status, comment, or acknowledge a reminder without registering. The creator can record completion on their behalf under Section 7. This is recorded as the creator’s action, not as an action performed by the dormant person.
 
@@ -77,7 +77,7 @@ A dormant person cannot directly change task status, comment, or acknowledge a r
 
 People can add, edit, search, import, and remove personal contacts. Manual entries require a name and valid international phone number. Contact search covers local name, phone, and available email.
 
-Device contacts are refreshed on app opening when permission is already granted and through a manual refresh action. Permission is requested only when the person chooses a contact feature that requires it. Import never sends invitations or creates assignments automatically.
+Device contacts are refreshed on app opening when permission is already granted and through a manual refresh action. Permission is requested only when the person chooses a contact feature that requires it. Import alone never assigns tasks or shares lists; the person explicitly chooses those actions.
 
 Repeated imports match by normalized phone number. A matching number updates local contact information. Different numbers are not merged by matching names or emails. A device contact with several numbers produces number-labeled choices such as “Ramesh (Mobile)” and “Ramesh (Work).” Contacts without usable numbers can remain visible but cannot be selected for assignment or membership.
 
@@ -254,9 +254,9 @@ People can add any accessible task to their private lists. This never changes th
 
 ### 12.2 Shared lists and membership
 
-A list owner can invite individual phone identities, including dormant people. Membership is Pending until the registered person accepts. Pending/dormant invitees cannot view list tasks. Invitations appear inside Karyavali after registration; sending an external WhatsApp invitation is an explicit manual action.
+A list owner shares a list by selecting contacts with valid phone numbers, including dormant people. Sharing directly adds each selected person as a member and grants list access without an invitation, acceptance, or approval step. Active users see the list after synchronization. Dormant members receive the same membership immediately and can access the list automatically after registering with that number. There is no invited, awaiting-acceptance, or declined membership state. A share made offline is saved locally and becomes visible to others after synchronization; synchronization is not recipient acceptance.
 
-Accepted members receive read access to list tasks. There are two list roles: Owner and Member. Only Owner can rename/recolor the shared list, invite/remove members, or delete the list. Members cannot manage membership or add/remove tasks. They can leave the list after confirmation. Ownership transfer is outside this version.
+Members receive read access to list tasks. There are two list roles: Owner and Member. Only Owner can rename/recolor the shared list, directly add/remove members, or delete the list. Members cannot manage membership or add/remove tasks. They can leave the list after confirmation. Ownership transfer is outside this version.
 
 Only the list owner can add/remove tasks in the shared collection, and they can add only tasks they created or have ancestor-creator authority over. Members cannot add their own tasks to someone else’s shared list. There is no task-placement approval flow. Membership does not grant task editing, comments, assignment, or completion; those actions require direct task permissions. Creating from a read-only shared list does not preselect that shared list and explains that the person can create a personal task instead.
 
@@ -341,7 +341,7 @@ Every reminder has one owner, one recipient, a start date/time, destination, and
 
 In-App means a persistent reminder event in Karyavali and a device notification when the recipient has enabled notifications. Denied notification permission does not remove the in-app event.
 
-WhatsApp means automatic scheduled delivery to the selected person’s number, not opening a composer. It requires the recipient to have registered, enabled WhatsApp reminders, and confirmed consent for that destination. Dormant or nonconsenting recipients are unavailable for scheduled WhatsApp delivery; manual WhatsApp sharing remains available. No automatic invitation or consent is inferred from task assignment.
+WhatsApp means automatic scheduled delivery to the selected person’s number, not opening a composer. It requires the recipient to have registered, enabled WhatsApp reminders, and confirmed consent for that destination. Dormant or nonconsenting recipients are unavailable for scheduled WhatsApp delivery; manual WhatsApp sharing remains available. Task assignment and direct list sharing do not by themselves enable scheduled WhatsApp reminders.
 
 ### 17.2 Schedule and acknowledgement
 
@@ -426,7 +426,7 @@ Contact aliases come from the local address book or personal manual entries; add
 
 Support includes application version/build and a voluntary diagnostic-report share action. Diagnostics exclude task/comment text, personal contact content, message bodies, OTPs, credentials, and secrets. Sharing requires a deliberate user action.
 
-The in-app activity area includes assignment notices, list invitations, rejected shared changes, and explicit reminders. System notifications are sent only for configured In-App reminders; this version does not send automatic push or WhatsApp messages for ordinary assignments, comments, or status changes.
+The in-app activity area includes assignment notices, directly shared-list notices, rejected shared changes, and explicit reminders. Assignment and shared-list notices are informational; neither requires acceptance. System notifications are sent only for configured In-App reminders; this version does not send automatic push or WhatsApp messages for ordinary assignments, comments, or status changes.
 
 ## 23. Accessibility, empty states, and recovery
 
@@ -448,7 +448,7 @@ The product must work with enlarged text and screen readers. Every action needs 
 | WhatsApp unavailable | Keep prepared preview and Copy available. |
 | OTP wrong/expired/unavailable | Allow number correction, code retry, and service-governed resend. |
 | Invalid relationship or recurrence | Explain the violated rule without silently changing it. |
-| Pending list invitation | No implied access; offer Accept or Decline to the invitee. |
+| Newly shared list | Show the list directly after synchronization; no Accept or Decline action. |
 
 Every destructive or access-changing confirmation names the action, affected task/list/people or count, and consequence. Confirmation labels describe the actual action. Cancel leaves the accepted product state unchanged.
 
@@ -457,6 +457,10 @@ Every destructive or access-changing confirmation names the action, affected tas
 | Scenario | Required result |
 | --- | --- |
 | Create a title-only task | One Pending task; no mandatory assignee, date, or list. |
+| Assign a task to an active contact | Assignment takes effect directly; no invitation or acceptance. |
+| Assign a task to a dormant contact | Assignment takes effect directly and appears automatically after registration with that number. |
+| Share a list with an active contact | Member access is granted directly; list appears after synchronization without acceptance. |
+| Share a list with a dormant contact | Membership is granted directly; list appears automatically after registration without acceptance. |
 | Tap Create repeatedly and reconnect | One logical task. |
 | Edit, leave, and reopen offline | Saved local edits remain; unshared state is visible. |
 | Mark a shared task Important | Only this viewer’s Important collection changes. |
@@ -491,7 +495,9 @@ Every destructive or access-changing confirmation names the action, affected tas
 
 ## 25. Product boundaries that prevent misinterpretation
 
-- Registration is mandatory; contact import is optional.
+- Registration is mandatory for using the app; contact import is optional.
+- Tasks are assigned directly to contacts and lists are shared directly. No invitation, acceptance, or recipient-approval workflow exists.
+- Dormant recipients receive assignments and list membership before registration; these become available automatically when they register with the matching phone number.
 - Dormant assignment is valid; dormant recipients do not perform in-app actions before registration.
 - A WhatsApp group is not a Karyavali person or shared-list membership group.
 - Shared task fields, private organization, and externally sent snapshots have different effects.
